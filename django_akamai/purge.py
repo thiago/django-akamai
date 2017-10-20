@@ -57,7 +57,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.db.models.query import QuerySet
 
 from six.moves.urllib.parse import urljoin
-
+import sys
 logger = logging.getLogger(__name__)
 
 
@@ -156,7 +156,9 @@ class PurgeRequest(object):
 
         if isinstance(urls, (list, tuple)):
             self.urls.extend(urls)
-        elif isinstance(urls, basestring):
+        elif sys.version_info < (3, ) and isinstance(urls, basestring):
+            self.urls.append(urls)
+        elif isinstance(urls, str):
             self.urls.append(urls)
         elif isinstance(urls, QuerySet):
             for obj in urls:
@@ -196,8 +198,8 @@ class PurgeRequest(object):
             while self.urls and batch_size < self.MAX_REQUEST_SIZE:
                 next_url = self.urls.pop()
 
-                if not isinstance(next_url, bytes):
-                    next_url = next_url.encode('utf-8')
+                #if not isinstance(next_url, bytes):
+                #    next_url = next_url.encode('utf-8')
 
                 batch.append(next_url)
                 batch_size += len(next_url)
